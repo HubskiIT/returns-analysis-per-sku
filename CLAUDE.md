@@ -20,9 +20,17 @@ Credential: `httpHeaderAuth` (nagłówek `x-api-key`), nie `anthropicApi` (ten t
 
 ## Status
 
-**Workflow n8n zbudowany, naprawiony i przetestowany end-to-end (17 węzłów, wszystkie success).** Workflow ID w n8n: `BkuEj75ftP0Kzywf`. Zbudowany przez `n8n-mcp` (community package `czlonkowski/n8n-mcp`, skonfigurowany w `.mcp.json` — wymaga `N8N_API_KEY` i `N8N_MCP_ACCESS_TOKEN` z n8n Settings).
+**Gotowy, opublikowany.** Workflow n8n zbudowany, naprawiony i przetestowany end-to-end (20 węzłów, wszystkie success). Workflow ID w n8n: `BkuEj75ftP0Kzywf`. Zbudowany przez `n8n-mcp` (community package `czlonkowski/n8n-mcp`, skonfigurowany w `.mcp.json` — wymaga `N8N_API_KEY` i `N8N_MCP_ACCESS_TOKEN` z n8n Settings).
 
-Pozostaje: podłączyć prawdziwy klucz SendGrid (węzeł "Send Email Report" tymczasowo wyłączony), commit do gita, publikacja portfolio.
+Repo: **https://github.com/HubskiIT/returns-analysis-per-sku** (publiczne, README.md angielski główny + README.pl.md polski).
+
+## Human-in-the-loop: GitHub Issue
+
+Gałąź `Check Confidence Threshold` (true) → `Aggregate Flagged Returns` → `Has Flagged Returns?` → `Create Review Issue` zbiera wszystkie `needs_review=true` z jednego przebiegu w JEDEN GitHub Issue (nie jeden per przypadek), z etykietą `needs-review`. Credential: `githubApi` (fine-grained PAT, scope: Contents read + **Issues read/write** — to dwa osobne uprawnienia, łatwo przeoczyć drugie).
+
+## Pozostaje
+
+Podłączyć prawdziwy klucz SendGrid (węzeł "Send Email Report" skonfigurowany poprawnie, tymczasowo wyłączony `disableNode` bo brak klucza).
 
 ## Zasady
 

@@ -49,11 +49,12 @@ Stan: Eval passou, prompt gotowy do n8n. Błędy w trudnych granicach (Niedopaso
 ## Krok 5: Workflow n8n
 
 - [x] Dodanie usługi `n8n` do `docker-compose.yml`, startup i healthchecks OK
-- [x] Workflow zbudowany i naprawiony przez `n8n-mcp` (17 węzłów, wszystkie połączenia zweryfikowane)
-- [x] Konfiguracja credentials: Anthropic (httpHeaderAuth `x-api-key`), Postgres
+- [x] Workflow zbudowany i naprawiony przez `n8n-mcp` (20 węzłów, wszystkie połączenia zweryfikowane)
+- [x] Konfiguracja credentials: Anthropic (httpHeaderAuth `x-api-key`), Postgres, GitHub (fine-grained PAT)
 - [x] **Zmiana architektoniczna**: `textClassifier` node zastąpiony bezpośrednim HTTP Request do Anthropic API z tym samym promptem co eval (90%) — textClassifier routinguje przez N osobnych wyjść bez pola confidence, niekompatybilne z mechanizmem `needs_review` z DESIGN.md
+- [x] **Human-in-the-loop**: gałąź Aggregate → IF → GitHub Issue zbiera wszystkie needs_review=true w JEDEN issue per przebieg, z etykietą `needs-review`
 - [x] Schedule Trigger skonfigurowany (co tydzień, poniedziałek 6:00)
-- [x] Test run przez `n8n_test_workflow`: wszystkie 17 węzłów **success**
+- [x] Test run przez `n8n_test_workflow`: wszystkie 20 węzłów **success**, GitHub Issue #2 potwierdzony na żywo
 - [x] Workflow zapisany w n8n pod ID `BkuEj75ftP0Kzywf`
 
 ## Krok 6: Testy end to end
@@ -61,22 +62,26 @@ Stan: Eval passou, prompt gotowy do n8n. Błędy w trudnych granicach (Niedopaso
 - [ ] `bruno-collection`: testy API report-service (opcjonalne)
 - [x] Pełne uruchomienie workflowu na danych mock (18 SKU + 36 zwrotów) — **sukces**
 - [x] Dane w Postgres zweryfikowane: 36 returns, 18 sku_catalog_cache, reason_category znormalizowane do dokładnie 8 kategorii z DESIGN.md
-- [x] Powtórne uruchomienie (execution #5 po TRUNCATE) — brak duplikatów dzięki `ON CONFLICT DO NOTHING` na `external_return_id`
+- [x] Powtórne uruchomienie (wielokrotnie, po TRUNCATE) — brak duplikatów dzięki `ON CONFLICT DO NOTHING` na `external_return_id`
 - [x] Raport PDF (`report_body` → `report-service` → HTML) generuje się poprawnie w pipeline
+- [x] GitHub Issue tworzy się poprawnie przy needs_review=true, potwierdzone na żywym repo
 - [ ] Send Email Report: tymczasowo wyłączony (`disableNode`) — brak klucza SendGrid, włączyć przed produkcją
 
-Stan: **Workflow w pełni funkcjonalny end-to-end.** Dwa błędy napotkane i naprawione po drodze:
+Stan: **Workflow w pełni funkcjonalny end-to-end, opublikowany na GitHubie.** Błędy napotkane i naprawione po drodze:
 1. `DB_TYPE: postgres` → powinno być `postgresdb` (n8n fallbackował na SQLite)
 2. `N8N_RESTRICT_FILE_ACCESS_TO` wymagane dla odczytu plików mock spoza `/home/node/.n8n`
 3. Anthropic API 503 przy 36 równoległych requestach → naprawione przez batching (3 items/1000ms)
 4. Model czasem zwracał pełny opis kategorii zamiast czystej nazwy → naprawione defensywną normalizacją w Code node
+5. IF node (typeVersion 1, stary format `conditions.number[]`) był po cichu przekształcany przez auto-sanitization n8n w odwrotny warunek → przejście na format `filter` (typeVersion 2.3)
+6. GitHub node `labels`/`assignees` wymaga płaskiej tablicy, nie fixedCollection wrapper (`labels.map is not a function`) — znalezione przez odczyt source `Github.node.js`
+7. Fine-grained GitHub PAT: dostęp do repo ≠ dostęp do Issues, to osobne uprawnienie; zmiana wymaga "Regenerate token", sama edycja nie wystarcza
 
 ## Krok 7: Dokumentacja i zamknięcie
 
-- [x] `README.md`: pełny opis, szybki start, architektura, eval results, troubleshooting
-- [x] Sekcja "Jak wdrożyć" z instrukcją podłączenia BaseLinker
+- [x] `README.md` (angielski, główny) i `README.pl.md`: pełny opis, szybki start, architektura, eval results, honest note o textClassifier, uwaga o fine-grained PAT
+- [x] Sekcja "Going to production" / "Droga do produkcji" z instrukcją BaseLinker, SendGrid, GitHub
 - [x] Struktura plików udokumentowana
-- [ ] `git init`, first commit, push do repo (publiczny portfolio)
+- [x] `git init`, first commit, push do repo publicznego: **https://github.com/HubskiIT/returns-analysis-per-sku**
 - [ ] Aktualizacja `../README.md` portfolio: projekt 01 status "Gotowy"
 - [ ] Notion (Rozwiązania): status "Production Ready"
 

@@ -2,128 +2,108 @@
 
 # Analiza przyczyn zwrotów per SKU
 
-**Status:** ✅ Gotowy (v1.0)  
-**Eval:** 90% trafności (próg 85% spełniony)  
-**API:** FastAPI + n8n + Postgres
+Cotygodniowa automatyzacja, która pokazuje które produkty generują najwięcej zwrotów i dlaczego, zanim to się zamieni w problem odkryty przypadkiem.
 
-Cotygodniowa automatyzacja łącząca dane zwrotów z trzech źródeł (opis klienta, stan magazynu, katalog) i klasyfikująca przyczyny zwrotów do 8 kategorii, aby pokazać które produkty generują najwięcej zwrotów i dlaczego. PDF report + email.
+Łączy dane zwrotów z trzech źródeł, które normalnie ze sobą nie rozmawiają (wolny tekst od klienta, notatka magazynu ze stanu towaru przy przyjęciu, katalog produktowy), klasyfikuje każdy zwrot do jednej z ośmiu stałych kategorii przez LLM, i zamienia tydzień chaotycznego tekstu w ranking, który zespół produktowy ogarnia w pięć minut.
 
-## 🚀 Szybki start (30 sekund)
+Projekt portfolio pokazujący konkretny wzorzec: **korelację między źródłami danych, której żadne gotowe SaaS nie zrobi**, bo te trzy źródła siedzą w osobnych systemach należących do sprzedawcy, nie do dostawcy narzędzia analitycznego.
 
-```bash
-cd 01-analiza-zwrotow-per-sku
-export ANTHROPIC_API_KEY="sk-..."  # Twój klucz
-docker compose up -d               # Startuj serwisy
-sleep 10
-open http://localhost:5678         # n8n UI
-# Import workflow: File → Import from File → n8n-workflows/weekly-returns-analysis.json
-# Kliknij "Execute Workflow"
+## Dlaczego to ma sens
+
+Sprawdziłem bibliotekę szablonów n8n przed budową, 1862 wyniki dla klasyfikacji i raportowania, żaden nie łączy notatek magazynowych, tekstu od klienta i katalogu w jeden widok per SKU. To nie przypadek: SaaS musiałby mieć jednoczesny dostęp zapisu do WMS, sklepu i skrzynki supportu. Workflow działający w twojej własnej infrastrukturze tego problemu nie ma.
+
+## Co dokładnie się dzieje
+
+```mermaid
+flowchart TD
+    A[Schedule Trigger, co poniedziałek 6:00] --> B[Katalog: adapter BaseLinker albo mock JSON]
+    B --> C[Upsert sku_catalog_cache w Postgres]
+    C --> D[Zwroty: adapter BaseLinker albo mock JSON]
+    D --> E[Klasyfikacja: Claude Haiku, 1 z 8 stałych kategorii]
+    E --> F{confidence ≥ 0.6?}
+    F -->|tak| G[Insert do returns, idempotentny na external_return_id]
+    F -->|nie| G
+    F -->|nie, zbiorczo| H[GitHub Issue z listą wszystkich niepewnych przypadków]
+    G --> I[Agregacja: ranking per SKU, rozkład kategorii, procent]
+    I --> J[report-service renderuje HTML i wykres SVG]
+    J --> K[Email z raportem do zespołu produktowego]
+    G --> L[Log przebiegu: liczba przetworzonych, liczba do weryfikacji]
 ```
 
-## 📊 Eval: Klasyfikacja przyczyn
+Osiem kategorii, stałych, nie generowanych swobodnie przez model, żeby wyniki dało się porównywać tydzień do tygodnia:
+
+1. Niezgodność z opisem lub zdjęciem
+2. Wada jakościowa, uszkodzenie fabryczne
+3. Uszkodzenie w transporcie
+4. Błędna wysyłka, nie ten produkt
+5. Niedopasowanie, rozmiar, kolor, dopasowanie
+6. Zmiana decyzji klienta
+7. Opóźniona dostawa, zamówienie nieaktualne
+8. Inne, nieokreślone
+
+Kiedy opis klienta i notatka magazynu się rozjeżdżają (klient pisze "wada", magazyn widzi zwykłe ślady noszenia), klasyfikator ma wybrać kategorię lepiej wspartą przez oba źródła i obniżyć confidence, zamiast zgadywać. Niepewne przypadki nie giną po cichu: trafiają zbiorczo do jednego GitHub Issue (jeden na przebieg, nie jeden na przypadek), żeby ktoś je przejrzał bez zalewu maili. [Tu przykład z realnego przebiegu testowego](https://github.com/HubskiIT/returns-analysis-per-sku/issues/2), z najlepszym przypuszczeniem klasyfikatora i oboma surowymi sygnałami, żeby recenzent nie musiał grzebać w danych źródłowych.
+
+## Ewaluacja klasyfikatora
+
+Prompt był testowany na ręcznie oznaczonym zbiorze zanim trafił do jakiegokolwiek węzła workflow, w tym kilka naprawdę niejednoznacznych przypadków (sarkazm, sprzeczne sygnały, "nie pasuje" bez żadnego kontekstu), bo jakość pipeline'u klasyfikacji mierzy się najgorszym przypadkiem, nie przypadkiem demo.
 
 | Metryka | Wynik |
-|---------|-------|
+|---|---|
 | Model | Claude Haiku 4.5 |
-| Dataset | 30 przykładów |
+| Zbiór eval | 30 ręcznie oznaczonych przykładów |
 | Trafność | **90% (27/30)** |
-| Próg | >85% ✅ |
-| Błędy | 3 (na granicach kategorii) |
+| Próg wdrożenia | 85% |
+| Błędy | 3, wszystkie na granicy dopasowanie kontra zmiana decyzji |
 
-Szczegóły: [`eval/results.md`](./eval/results.md)
-
-## 🏗️ Architektura
-
-```
-Schedule Trigger (poniedziałek 6:00)
-    ↓
-Fetch Mock Data (albo BaseLinker)
-    ↓
-Upsert SKU Cache (Postgres)
-    ↓
-Claude Haiku textClassifier (8 kategorii)
-    ↓
-Check Confidence (>0.6)
-    ├─→ Save to returns (needs_review=true jeśli <0.6)
-    │
-Aggregate SQL (ranking per SKU)
-    ↓
-POST /render (report-service)
-    ↓
-Send Email
-    ↓
-Log classification_run
-```
-
-## 📂 Struktura plików
-
-```
-├── DESIGN.md                      Pełna specyfikacja
-├── README.md                      Ten plik
-├── docker-compose.yml             3 serwisy (n8n, postgres, report-service)
-├── .env.example                   Template zmiennych
-├── db/
-│   └── init.sql                   Schemat Postgres
-├── data/mock/
-│   ├── returns_sample.json        36 zwrotów do testowania
-│   └── catalog_sample.json        18 SKU
-├── n8n-workflows/
-│   ├── weekly-returns-analysis.json  Workflow (do importu w n8n)
-│   └── classifier_prompt.md        Prompt dla textClassifier
-├── eval/
-│   ├── dataset.jsonl              30 labeled examples
-│   ├── run_eval.py                Skrypt eval
-│   └── results.md                 Wyniki eval (90%)
-├── report-service/                FastAPI + Jinja2 + SVG
-│   ├── app/main.py                Endpoint POST /render
-│   ├── app/models.py              Pydantic models
-│   ├── app/chart.py               SVG chart generator
-│   ├── app/templates/             HTML + CSS
-│   ├── tests/                     Pytest (7 testów)
-│   └── Dockerfile
-└── bruno-collection/              HTTP testy (opcjonalne)
-```
-
-## 🔌 Serwisy (docker-compose)
-
-| Serwis | Port | Rola |
-|--------|------|------|
-| **n8n** | 5678 | Orkiestracja + UI |
-| **postgres** | 5432 | Baza danych |
-| **report-service** | 8000 | API do generowania raportów |
-
-## 📝 Konfiguracja
-
-### .env (nie commituj!)
+Pełna macierz pomyłek: [`eval/results.md`](./eval/results.md). Uruchom sam:
 
 ```bash
-# Wymagane
-N8N_ENCRYPTION_KEY=JbrVnwAOd8sWheXLedboh1WJtITeAF4dS3twv5Pphgg=
-ANTHROPIC_API_KEY=sk-...
-
-# Opcjonalne (domyślnie w docker-compose)
-# POSTGRES_USER=postgres
-# POSTGRES_PASSWORD=postgres
+export ANTHROPIC_API_KEY="sk-..."
+python eval/run_eval.py
 ```
 
-### Schemat Postgres
+## Szczera uwaga o węźle klasyfikatora n8n
+
+Projekt pierwotnie zakładał wbudowany węzeł n8n `@n8n/n8n-nodes-langchain.textClassifier`, zrobiony dokładnie do tego celu. W praktyce routinguje każdy item na jedno z *N* osobnych wyjść zamiast zwracać pole `confidence` w JSON, co uniemożliwia zbudowanie logiki progu confidence i `needs_review`, na której ten projekt się opiera.
+
+Workflow zamiast tego wywołuje Anthropic Messages API bezpośrednio przez węzeł HTTP Request, z dokładnie tym samym promptem który dał 90% w eval, i parsuje `{category, confidence}` z odpowiedzi w małym węźle Code (z defensywną normalizacją, bo model czasem odbija pełny opis kategorii zamiast samej nazwy). Ta sama trafność, a mechanizm progu confidence dalej działa. Jeśli budujesz coś podobnego, warto to wiedzieć zanim postawisz na `textClassifier` w przypadku wymagającym confidence per item.
+
+## Stack
+
+- **n8n** — orkiestracja (workflow z 20 węzłów, JSON gotowy do importu w [`n8n-workflows/`](./n8n-workflows/))
+- **Claude Haiku 4.5** (Anthropic API) — klasyfikacja przyczyn
+- **PostgreSQL 16** — źródło prawdy (`returns`, `sku_catalog_cache`, `classification_runs`)
+- **FastAPI + Jinja2** — report-service, renderuje raport HTML/PDF z ręcznie napisanym wykresem SVG (bez matplotlib, o jedną zależność systemową mniej w obrazie)
+- **GitHub API** — niepewne przypadki trafiają do jednego, oznaczonego etykietą Issue zamiast ginąć w skrzynce
+- **Docker Compose** — cały stack, jedna komenda
+
+## Szybki start
+
+```bash
+git clone https://github.com/HubskiIT/returns-analysis-per-sku.git
+cd returns-analysis-per-sku
+export ANTHROPIC_API_KEY="sk-..."
+docker compose up -d
+```
+
+Otwórz n8n na `http://localhost:5678`, zaimportuj [`n8n-workflows/weekly-returns-analysis.json`](./n8n-workflows/weekly-returns-analysis.json), podepnij swoje credentials Anthropic i Postgres, uruchom. Projekt ma wbudowane 36 mockowych zwrotów i 18 mockowych SKU, więc cały pipeline daje się pokazać bez podłączania prawdziwego sklepu.
+
+## Model danych
 
 ```sql
--- Zwroty z klasyfikacją
 CREATE TABLE returns (
     id BIGSERIAL PRIMARY KEY,
-    external_return_id TEXT UNIQUE NOT NULL,  -- Idempotencja
+    external_return_id TEXT UNIQUE NOT NULL,   -- powtórne uruchomienie nigdy nie liczy podwójnie
     sku TEXT NOT NULL REFERENCES sku_catalog_cache(sku),
-    reason_category TEXT NOT NULL,             -- 8 kategorii
-    confidence NUMERIC(4,3) NOT NULL,          -- 0.0-1.0
-    needs_review BOOLEAN NOT NULL DEFAULT false,  -- <0.6
-    reason_text TEXT NOT NULL,                 -- Od klienta
-    condition_note TEXT,                       -- Od magazynu
+    reason_category TEXT NOT NULL,             -- jedna z 8 stałych kategorii
+    confidence NUMERIC(4,3) NOT NULL,
+    needs_review BOOLEAN NOT NULL DEFAULT false,
+    reason_text TEXT NOT NULL,                 -- słowa klienta
+    condition_note TEXT,                       -- notatka magazynu
     returned_at TIMESTAMPTZ NOT NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
--- Cachowane dane produktów
 CREATE TABLE sku_catalog_cache (
     sku TEXT PRIMARY KEY,
     name TEXT NOT NULL,
@@ -133,7 +113,6 @@ CREATE TABLE sku_catalog_cache (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
--- Log przebiegów
 CREATE TABLE classification_runs (
     id BIGSERIAL PRIMARY KEY,
     run_at TIMESTAMPTZ NOT NULL DEFAULT now(),
@@ -142,61 +121,48 @@ CREATE TABLE classification_runs (
 );
 ```
 
-## 🧪 Testowanie
+## Struktura repo
 
-### Unit (report-service)
-
-```bash
-cd report-service
-python -m pytest tests/ -v
+```
+├── DESIGN.md                         pełna specyfikacja architektury i decyzje za nią stojące
+├── docker-compose.yml                n8n + postgres + report-service
+├── db/init.sql                       schemat powyżej, aplikowany przy pierwszym uruchomieniu
+├── data/mock/                        36 zwrotów, 18 SKU katalogu, tryb demo bez żywego sklepu
+├── n8n-workflows/
+│   ├── weekly-returns-analysis.json  workflow, gotowy do importu
+│   └── classifier_prompt.md          dokładny prompt używany przez workflow i skrypt eval
+├── eval/
+│   ├── dataset.jsonl                 30 ręcznie oznaczonych przykładów
+│   ├── run_eval.py                   trafność i macierz pomyłek, uruchom przed dotknięciem n8n
+│   └── results.md                    ostatni wynik eval
+└── report-service/                   aplikacja FastAPI: modele Pydantic, wykres SVG, szablon Jinja2, testy pytest
 ```
 
-7 testów:
-- POST /render z 2 SKU
-- SVG chart generation
-- Pydantic model validation
-- Error handling (brakujące SKU, negatywne liczby)
-
-### Eval (klasyfikator)
+## Testowanie
 
 ```bash
-export ANTHROPIC_API_KEY="sk-..."
+# testy jednostkowe report-service (modele, generowanie wykresu, walidacja)
+cd report-service && python -m pytest tests/ -v
+
+# eval klasyfikatora (trafność na ręcznie oznaczonym zbiorze)
 python eval/run_eval.py
-# Output: eval/results.md (macierz pomyłek + szczegóły)
+
+# end to end: uruchom workflow w n8n, sprawdź Postgres
+docker compose exec postgres psql -U postgres -d returns_analysis -c "SELECT * FROM returns;"
 ```
 
-30 przykładów, rezultat 90% trafności.
+Powtórne uruchomienie workflow na tych samych danych mock nie duplikuje wierszy, od tego jest ograniczenie `UNIQUE` na `external_return_id`, zweryfikowane przez faktyczne powtórne uruchomienie, nie tylko zapisane w dokumencie.
 
-### End-to-end
+## Droga do produkcji
 
-1. Uruchom workflow w n8n UI (localhost:5678)
-2. Sprawdź Postgres: `docker compose exec postgres psql -U postgres -d returns_analysis -c "SELECT * FROM returns;"`
-3. Sprawdź że powtórne uruchomienie nie duplikuje wpisów (`UNIQUE` na `external_return_id`)
+1. Zamień węzły czytające mock JSON na prawdziwy adapter BaseLinker (albo cokolwiek twój system zamówień i zwrotów udostępnia).
+2. Ustaw schedule trigger na swój rzeczywisty rytm raportowania. Co tydzień, poniedziałek 6:00 to wartość domyślna, nie wymóg.
+3. Podepnij prawdziwy credential SendGrid (albo SMTP) do węzła email. Jest w pełni skonfigurowany i gotowy, tylko domyślnie wyłączony, żeby workflow nie wywalał się na brakującym kluczu od razu po sklonowaniu.
+4. Skieruj węzeł GitHub Issue na własne repo (albo zamień na Slack, Linear, cokolwiek twój zespół faktycznie obserwuje).
+5. Obserwuj `flagged_for_review` jako procent całości. Jeśli konsekwentnie przekracza około 20 procent, prompt potrzebuje kolejnej rundy eval zanim zaufasz mu bez nadzoru.
 
-## 🔧 Troubleshooting
+**Uwaga o fine-grained tokenach GitHub**, bo kosztowała realny czas debugowania: przyznanie tokenowi dostępu do repo to nie to samo co przyznanie dostępu do *Issues*. To osobne checkboxy w sekcji "Repository permissions", a 403 od GitHuba przy braku tego drugiego nie mówi którego uprawnienia brakuje, chyba że przeczytasz nagłówek odpowiedzi `x-accepted-github-permissions`. Zmiana uprawnień nie działa też dopóki nie klikniesz "Regenerate token", nawet jeśli zmieniłeś tylko same uprawnienia. Jeśli węzeł GitHub zwraca "Resource not accessible by personal access token", to najpewniej właśnie to.
 
-| Problem | Rozwiązanie |
-|---------|-------------|
-| ANTHROPIC_API_KEY missing | `export ANTHROPIC_API_KEY="sk-..."` |
-| Postgres connection refused | `docker compose ps` (sprawdź healthy), `docker compose logs postgres` |
-| report-service nie responds | `curl http://localhost:8000/health` |
-| n8n workflow nie uruchamia się | Sprawdź credentials, test każdego węzła osobno |
+## Licencja
 
-## 📈 Jak wdrożyć
-
-1. **Ustawy BaseLinker adapter** zamiast mock HTTP Request
-2. **Testuj na 50 zwrotach** zanim puszczasz do produkcji
-3. **Zaplanuj schedule trigger** na każdy poniedziałek 6:00 (UTC+2)
-4. **Skonfiguruj email** (SendGrid lub inne)
-5. **Monitoring**: logi z n8n, alerty jeśli `flagged_for_review` > 20%
-
-## 📚 Dokumentacja
-
-- [DESIGN.md](./DESIGN.md) — Full spec (architektura, decyzje, model danych)
-- [n8n-workflows/classifier_prompt.md](./n8n-workflows/classifier_prompt.md) — Prompt do klasyfikatora
-- [eval/results.md](./eval/results.md) — Wyniki eval (macierz pomyłek)
-- [docker-compose.yml](./docker-compose.yml) — Konfiguracja serwisów
-
-## 📄 Licencja
-
-MIT License — autor: Hubert Grzybowski (grzybowski.it@gmail.com)
+MIT — Hubert Grzybowski ([grzybowski.it@gmail.com](mailto:grzybowski.it@gmail.com))

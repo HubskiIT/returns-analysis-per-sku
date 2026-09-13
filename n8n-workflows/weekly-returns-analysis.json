@@ -1,6 +1,6 @@
 [
     {
-        "updatedAt": "2026-09-13T10:08:16.816Z",
+        "updatedAt": "2026-09-13T10:35:19.077Z",
         "createdAt": "2026-09-13T09:12:52.987Z",
         "id": "BkuEj75ftP0Kzywf",
         "name": "Weekly Returns Analysis",
@@ -15,7 +15,7 @@
                 "typeVersion": 1,
                 "position": [
                     0,
-                    0
+                    -144
                 ],
                 "parameters": {
                     "rule": {
@@ -31,8 +31,8 @@
                 "type": "n8n-nodes-base.postgres",
                 "typeVersion": 2,
                 "position": [
-                    400,
-                    0
+                    896,
+                    -144
                 ],
                 "parameters": {
                     "operation": "executeQuery",
@@ -52,20 +52,31 @@
                 "id": "0d0fd5ba-0ab3-4fa0-ac68-64dd6e2e05fd",
                 "name": "Check Confidence Threshold",
                 "type": "n8n-nodes-base.if",
-                "typeVersion": 1,
+                "typeVersion": 2.3,
                 "position": [
-                    848,
-                    0
+                    2464,
+                    -144
                 ],
                 "parameters": {
                     "conditions": {
-                        "number": [
+                        "options": {
+                            "version": 2,
+                            "leftValue": "",
+                            "caseSensitive": true,
+                            "typeValidation": "strict"
+                        },
+                        "conditions": [
                             {
-                                "value1": "={{ $json.confidence }}",
-                                "value2": 0.6,
-                                "comparator": "lt"
+                                "leftValue": "={{ $json.confidence }}",
+                                "rightValue": 0.6,
+                                "operator": {
+                                    "type": "number",
+                                    "operation": "lt"
+                                },
+                                "id": "condition-1789295597719-5rj6yaz7z"
                             }
-                        ]
+                        ],
+                        "combinator": "and"
                     }
                 }
             },
@@ -75,8 +86,8 @@
                 "type": "n8n-nodes-base.postgres",
                 "typeVersion": 2,
                 "position": [
-                    1008,
-                    0
+                    2688,
+                    -144
                 ],
                 "parameters": {
                     "operation": "executeQuery",
@@ -98,12 +109,13 @@
                 "type": "n8n-nodes-base.postgres",
                 "typeVersion": 2,
                 "position": [
-                    1200,
-                    0
+                    2912,
+                    -144
                 ],
                 "parameters": {
                     "operation": "executeQuery",
-                    "query": "WITH sku_totals AS (SELECT sku, COUNT(*) as return_count FROM returns GROUP BY sku), category_json AS (SELECT sku, json_object_agg(reason_category, cat_count) as category_breakdown FROM (SELECT sku, reason_category, COUNT(*) as cat_count FROM returns GROUP BY sku, reason_category) sub GROUP BY sku), top10 AS (SELECT st.sku, c.name as product_name, st.return_count, ROUND(st.return_count * 100.0 / GREATEST((SELECT COUNT(*) FROM returns), 1), 1) as percent_of_total, cj.category_breakdown FROM sku_totals st JOIN sku_catalog_cache c ON st.sku = c.sku JOIN category_json cj ON st.sku = cj.sku ORDER BY st.return_count DESC LIMIT 10) SELECT json_build_object('reporting_period', to_char(now() - interval '7 days', 'YYYY-MM-DD') || ' to ' || to_char(now(), 'YYYY-MM-DD'), 'total_returns', (SELECT COUNT(*) FROM returns), 'total_flagged_for_review', (SELECT COUNT(*) FROM returns WHERE needs_review = true), 'top_skus', COALESCE((SELECT json_agg(top10) FROM top10), '[]'::json)) as report_body"
+                    "query": "WITH sku_totals AS (SELECT sku, COUNT(*) as return_count FROM returns GROUP BY sku), category_json AS (SELECT sku, json_object_agg(reason_category, cat_count) as category_breakdown FROM (SELECT sku, reason_category, COUNT(*) as cat_count FROM returns GROUP BY sku, reason_category) sub GROUP BY sku), top10 AS (SELECT st.sku, c.name as product_name, st.return_count, ROUND(st.return_count * 100.0 / GREATEST((SELECT COUNT(*) FROM returns), 1), 1) as percent_of_total, cj.category_breakdown FROM sku_totals st JOIN sku_catalog_cache c ON st.sku = c.sku JOIN category_json cj ON st.sku = cj.sku ORDER BY st.return_count DESC LIMIT 10) SELECT json_build_object('reporting_period', to_char(now() - interval '7 days', 'YYYY-MM-DD') || ' to ' || to_char(now(), 'YYYY-MM-DD'), 'total_returns', (SELECT COUNT(*) FROM returns), 'total_flagged_for_review', (SELECT COUNT(*) FROM returns WHERE needs_review = true), 'top_skus', COALESCE((SELECT json_agg(top10) FROM top10), '[]'::json)) as report_body",
+                    "options": {}
                 },
                 "credentials": {
                     "postgres": {
@@ -118,17 +130,16 @@
                 "type": "n8n-nodes-base.httpRequest",
                 "typeVersion": 3,
                 "position": [
-                    1408,
-                    0
+                    3136,
+                    -144
                 ],
                 "parameters": {
                     "method": "POST",
                     "url": "http://report-service:8000/render",
-                    "options": {},
-                    "jsonBody": "={{ JSON.stringify($json.report_body) }}",
                     "sendBody": true,
-                    "contentType": "json",
-                    "specifyBody": "json"
+                    "specifyBody": "json",
+                    "jsonBody": "={{ JSON.stringify($json.report_body) }}",
+                    "options": {}
                 }
             },
             {
@@ -138,19 +149,18 @@
                 "type": "n8n-nodes-base.sendGrid",
                 "typeVersion": 1,
                 "position": [
-                    1600,
-                    0
+                    3360,
+                    -144
                 ],
                 "parameters": {
                     "resource": "mail",
-                    "operation": "send",
                     "fromEmail": "noreply@returns-analysis.local",
                     "fromName": "Returns Analysis",
                     "toEmail": "team@example.com",
                     "subject": "Weekly Returns Analysis Report",
-                    "dynamicTemplate": false,
                     "contentType": "text/html",
-                    "contentValue": "={{ $node['Render Report PDF'].json.html }}"
+                    "contentValue": "={{ $node['Render Report PDF'].json.html }}",
+                    "additionalFields": {}
                 },
                 "credentials": {
                     "sendGridApi": {
@@ -165,8 +175,8 @@
                 "type": "n8n-nodes-base.postgres",
                 "typeVersion": 2,
                 "position": [
-                    1808,
-                    0
+                    3584,
+                    -144
                 ],
                 "parameters": {
                     "operation": "executeQuery",
@@ -188,12 +198,12 @@
                 "type": "n8n-nodes-base.readWriteFile",
                 "typeVersion": 1.1,
                 "position": [
-                    208,
-                    0
+                    1344,
+                    -144
                 ],
                 "parameters": {
-                    "operation": "read",
-                    "fileSelector": "/home/node/data/mock/returns_sample.json"
+                    "fileSelector": "/home/node/data/mock/returns_sample.json",
+                    "options": {}
                 }
             },
             {
@@ -202,13 +212,12 @@
                 "type": "n8n-nodes-base.extractFromFile",
                 "typeVersion": 1.1,
                 "position": [
-                    300,
-                    0
+                    1568,
+                    -144
                 ],
                 "parameters": {
                     "operation": "fromJson",
-                    "binaryPropertyName": "data",
-                    "destinationKey": "data"
+                    "options": {}
                 }
             },
             {
@@ -217,12 +226,12 @@
                 "type": "n8n-nodes-base.splitOut",
                 "typeVersion": 1,
                 "position": [
-                    350,
-                    0
+                    1792,
+                    -144
                 ],
                 "parameters": {
                     "fieldToSplitOut": "data",
-                    "include": "noOtherFields"
+                    "options": {}
                 }
             },
             {
@@ -231,12 +240,12 @@
                 "type": "n8n-nodes-base.readWriteFile",
                 "typeVersion": 1.1,
                 "position": [
-                    100,
-                    -150
+                    224,
+                    -144
                 ],
                 "parameters": {
-                    "operation": "read",
-                    "fileSelector": "/home/node/data/mock/catalog_sample.json"
+                    "fileSelector": "/home/node/data/mock/catalog_sample.json",
+                    "options": {}
                 }
             },
             {
@@ -245,13 +254,12 @@
                 "type": "n8n-nodes-base.extractFromFile",
                 "typeVersion": 1.1,
                 "position": [
-                    150,
-                    -150
+                    448,
+                    -144
                 ],
                 "parameters": {
                     "operation": "fromJson",
-                    "binaryPropertyName": "data",
-                    "destinationKey": "data"
+                    "options": {}
                 }
             },
             {
@@ -260,12 +268,12 @@
                 "type": "n8n-nodes-base.splitOut",
                 "typeVersion": 1,
                 "position": [
-                    200,
-                    -150
+                    672,
+                    -144
                 ],
                 "parameters": {
                     "fieldToSplitOut": "data",
-                    "include": "noOtherFields"
+                    "options": {}
                 }
             },
             {
@@ -274,12 +282,10 @@
                 "type": "n8n-nodes-base.limit",
                 "typeVersion": 1,
                 "position": [
-                    750,
-                    0
+                    1120,
+                    -144
                 ],
-                "parameters": {
-                    "maxItems": 1
-                }
+                "parameters": {}
             },
             {
                 "id": "511aa8d6-c2bd-4e94-b269-f22ec1c7ad37",
@@ -287,8 +293,8 @@
                 "type": "n8n-nodes-base.httpRequest",
                 "typeVersion": 4.5,
                 "position": [
-                    608,
-                    0
+                    2016,
+                    -144
                 ],
                 "parameters": {
                     "method": "POST",
@@ -309,14 +315,12 @@
                         ]
                     },
                     "sendBody": true,
-                    "contentType": "json",
                     "specifyBody": "json",
                     "jsonBody": "={{ JSON.stringify({model: \"claude-haiku-4-5\", max_tokens: 128, messages: [{role: \"user\", content: \"Jeste\\u015b klasyfikatorem przyczyn zwrot\\u00f3w w sklepie internetowym. Na podstawie tekstu klienta i notatki magazynu wybierz dok\\u0142adnie jedn\\u0105 kategori\\u0119 z zamkni\\u0119tej listy.\\n\\nKategorie:\\n1. Niezgodno\\u015b\\u0107 z opisem lub zdj\\u0119ciem - produkt, kolor, materia\\u0142, rozmiar lub w\\u0142a\\u015bciwo\\u015b\\u0107 r\\u00f3\\u017cni si\\u0119 od informacji na stronie, ale nie chodzi o preferencj\\u0119 dopasowania.\\n2. Wada jako\\u015bciowa, uszkodzenie fabryczne - wada produktu powsta\\u0142a przed u\\u017cyciem lub przy produkcji.\\n3. Uszkodzenie w transporcie - uszkodzenie powsta\\u0142o podczas dostawy; uwzgl\\u0119dnij wgniecione albo rozerwane opakowanie.\\n4. B\\u0142\\u0119dna wysy\\u0142ka, nie ten produkt - wys\\u0142ano inny SKU, wariant, kolor albo rozmiar ni\\u017c zam\\u00f3wiony.\\n5. Niedopasowanie, rozmiar, kolor, dopasowanie - produkt nie pasuje klientowi rozmiarem, fasonem, kolorem preferowanym przez klienta albo wygod\\u0105, bez twierdzenia, \\u017ce opis by\\u0142 fa\\u0142szywy.\\n6. Zmiana decyzji klienta - klient po prostu zmieni\\u0142 zdanie albo produkt nie jest ju\\u017c potrzebny.\\n7. Op\\u00f3\\u017aniona dostawa, zam\\u00f3wienie nieaktualne - zwrot wynika z op\\u00f3\\u017anienia dostawy lub utraty aktualno\\u015bci zam\\u00f3wienia.\\n8. Inne, nieokre\\u015blone - brak wystarczaj\\u0105cych informacji albo przyczyna nie pasuje do pozosta\\u0142ych kategorii.\\n\\nZasady rozstrzygania:\\n- Najpierw rozdziel b\\u0142\\u0105d sklepu lub przewo\\u017anika od zwyk\\u0142ego braku dopasowania.\\n- Je\\u015bli klient i magazyn opisuj\\u0105 r\\u00f3\\u017cne przyczyny, wybierz kategori\\u0119 najlepiej wspart\\u0105 przez oba \\u017ar\\u00f3d\\u0142a i obni\\u017c confidence.\\n- Notatka magazynu jest dowodem stanu fizycznego, ale nie uniewa\\u017cnia wiarygodnego opisu klienta dotycz\\u0105cego koloru, materia\\u0142u albo dostawy.\\n- Nie tw\\u00f3rz nowych kategorii i nie t\\u0142umacz decyzji poza wymaganym JSON-em.\\n- confidence to liczba od 0 do 1. U\\u017cyj ni\\u017cszej warto\\u015bci, gdy teksty s\\u0105 kr\\u00f3tkie, sprzeczne albo niejednoznaczne.\\n\\nTekst klienta:\\n<reason_text>\\n\" + $json.reason_text + \"\\n</reason_text>\\n\\nNotatka magazynu:\\n<condition_note>\\n\" + $json.condition_note + \"\\n</condition_note>\\n\\nZwr\\u00f3\\u0107 wy\\u0142\\u0105cznie jeden poprawny obiekt JSON, bez markdownu i bez dodatkowych p\\u00f3l:\\n{\\\"category\\\":\\\"jedna z o\\u015bmiu kategorii powy\\u017cej\\\",\\\"confidence\\\":0.00}\"}]}) }}",
                     "options": {
                         "batching": {
                             "batch": {
-                                "batchSize": 3,
-                                "batchInterval": 1000
+                                "batchSize": 3
                             }
                         }
                     }
@@ -334,12 +338,96 @@
                 "type": "n8n-nodes-base.code",
                 "typeVersion": 2,
                 "position": [
-                    750,
-                    0
+                    2240,
+                    -144
                 ],
                 "parameters": {
-                    "language": "javaScript",
                     "jsCode": "const CATEGORIES = [\n  'Niezgodno\u015b\u0107 z opisem lub zdj\u0119ciem',\n  'Wada jako\u015bciowa, uszkodzenie fabryczne',\n  'Uszkodzenie w transporcie',\n  'B\u0142\u0119dna wysy\u0142ka, nie ten produkt',\n  'Niedopasowanie, rozmiar, kolor, dopasowanie',\n  'Zmiana decyzji klienta',\n  'Op\u00f3\u017aniona dostawa, zam\u00f3wienie nieaktualne',\n  'Inne, nieokre\u015blone'\n];\n\nfunction normalizeCategory(raw) {\n  if (!raw) return { category: 'Inne, nieokre\u015blone', matched: false };\n  const cleaned = raw.replace(/^\\d+\\.\\s*/, '').trim();\n  for (const cat of CATEGORIES) {\n    if (cleaned === cat || cleaned.startsWith(cat)) {\n      return { category: cat, matched: true };\n    }\n  }\n  return { category: 'Inne, nieokre\u015blone', matched: false };\n}\n\nconst originals = $('Split Out Returns').all();\nconst responses = $input.all();\nconst results = [];\nfor (let i = 0; i < responses.length; i++) {\n  const raw = responses[i].json.content?.[0]?.text || '';\n  const cleaned = raw.trim().replace(/^```(?:json)?\\s*|\\s*```$/gi, '');\n  const start = cleaned.indexOf('{');\n  const end = cleaned.lastIndexOf('}');\n  const parsed = JSON.parse(cleaned.slice(start, end + 1));\n  const { category, matched } = normalizeCategory(parsed.category);\n  let confidence = typeof parsed.confidence === 'number' ? parsed.confidence : 0.5;\n  if (!matched) confidence = Math.min(confidence, 0.4);\n  results.push({\n    json: {\n      ...originals[i].json,\n      reason_category: category,\n      confidence,\n      needs_review: confidence < 0.6\n    }\n  });\n}\nreturn results;"
+                }
+            },
+            {
+                "id": "2a3a9176-fb68-47f7-aa34-a0aa2bd828be",
+                "name": "Aggregate Flagged Returns",
+                "type": "n8n-nodes-base.aggregate",
+                "typeVersion": 1,
+                "position": [
+                    1050,
+                    200
+                ],
+                "parameters": {
+                    "aggregate": "aggregateAllItemData",
+                    "destinationFieldName": "flagged_returns"
+                }
+            },
+            {
+                "id": "fb54590b-14bd-4256-9f26-e6cd4a246879",
+                "name": "Has Flagged Returns?",
+                "type": "n8n-nodes-base.if",
+                "typeVersion": 2.3,
+                "position": [
+                    1250,
+                    200
+                ],
+                "parameters": {
+                    "conditions": {
+                        "options": {
+                            "version": 2,
+                            "leftValue": "",
+                            "caseSensitive": true,
+                            "typeValidation": "strict"
+                        },
+                        "conditions": [
+                            {
+                                "leftValue": "={{ $json.flagged_returns.length }}",
+                                "rightValue": 0,
+                                "operator": {
+                                    "type": "number",
+                                    "operation": "gt"
+                                },
+                                "id": "condition-1789295597719-j30u3l55t"
+                            }
+                        ],
+                        "combinator": "and"
+                    }
+                }
+            },
+            {
+                "id": "e9ff6bbf-2902-49ba-9fee-3c084217596d",
+                "name": "Create Review Issue",
+                "webhookId": "88c94ed0-643a-4bb9-b6bc-4bda7c6b3092",
+                "type": "n8n-nodes-base.github",
+                "typeVersion": 1.1,
+                "position": [
+                    1450,
+                    200
+                ],
+                "parameters": {
+                    "resource": "issue",
+                    "operation": "create",
+                    "owner": {
+                        "__rl": true,
+                        "mode": "name",
+                        "value": "HubskiIT"
+                    },
+                    "repository": {
+                        "__rl": true,
+                        "mode": "name",
+                        "value": "returns-analysis-per-sku"
+                    },
+                    "title": "={{ 'Returns needing manual review \u2014 ' + $now.format('yyyy-MM-dd') + ' (' + $json.flagged_returns.length + ' case' + ($json.flagged_returns.length === 1 ? '' : 's') + ')' }}",
+                    "body": "={{ 'The classifier scored the following returns below the 0.6 confidence threshold. Customer and warehouse signals may conflict, or the text may be too short/ambiguous to classify reliably.\\n\\n' + $json.flagged_returns.map(item => '- **' + item.external_return_id + '** (SKU `' + item.sku + '`, confidence ' + item.confidence + ') \u2014 best guess: _' + item.reason_category + '_\\n  > Customer: ' + item.reason_text + '\\n  > Warehouse: ' + item.condition_note).join('\\n\\n') }}",
+                    "labels": [
+                        {
+                            "label": "needs-review"
+                        }
+                    ],
+                    "assignees": []
+                },
+                "credentials": {
+                    "githubApi": {
+                        "id": "ShIVLtD349QhItzU",
+                        "name": "github_default"
+                    }
                 }
             }
         ],
@@ -349,6 +437,11 @@
                     [
                         {
                             "node": "Save Returns to Database",
+                            "type": "main",
+                            "index": 0
+                        },
+                        {
+                            "node": "Aggregate Flagged Returns",
                             "type": "main",
                             "index": 0
                         }
@@ -526,6 +619,28 @@
                         }
                     ]
                 ]
+            },
+            "Aggregate Flagged Returns": {
+                "main": [
+                    [
+                        {
+                            "node": "Has Flagged Returns?",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "Has Flagged Returns?": {
+                "main": [
+                    [
+                        {
+                            "node": "Create Review Issue",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
             }
         },
         "settings": {
@@ -537,9 +652,9 @@
         "meta": null,
         "nodeGroups": [],
         "pinData": {},
-        "versionId": "d8c382a5-155d-4f9a-93d0-61c5d92c4fc5",
+        "versionId": "a7f56ee5-73b7-4d08-8e73-5b2504d8e1b6",
         "activeVersionId": null,
-        "versionCounter": 19,
+        "versionCounter": 26,
         "triggerCount": 0,
         "sourceWorkflowId": null,
         "tags": [],
