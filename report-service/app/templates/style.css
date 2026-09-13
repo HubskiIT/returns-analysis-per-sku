@@ -1,0 +1,242 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+@page {
+    size: A4;
+    margin: 20mm;
+    @bottom-center {
+        content: "Strona " counter(page) " z " counter(pages);
+        font-size: 9pt;
+        color: #999;
+    }
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    color: #1F2937;
+    line-height: 1.6;
+    background: white;
+}
+
+.container {
+    max-width: 210mm;
+    margin: 0 auto;
+    padding: 0;
+}
+
+.report-header {
+    border-bottom: 3px solid #2563EB;
+    padding-bottom: 20px;
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+.report-header h1 {
+    font-size: 28px;
+    color: #1F2937;
+    margin-bottom: 10px;
+}
+
+.report-header .period {
+    font-size: 14px;
+    color: #6B7280;
+    margin: 5px 0;
+}
+
+.report-header .generated {
+    font-size: 12px;
+    color: #9CA3AF;
+    margin-top: 8px;
+}
+
+.summary-section {
+    margin-bottom: 40px;
+}
+
+.summary-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px;
+}
+
+.summary-card {
+    border: 1px solid #E5E7EB;
+    border-radius: 6px;
+    padding: 20px;
+    text-align: center;
+    background: #F9FAFB;
+}
+
+.summary-label {
+    font-size: 12px;
+    color: #6B7280;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+}
+
+.summary-value {
+    font-size: 32px;
+    font-weight: 700;
+    color: #2563EB;
+}
+
+.chart-section {
+    margin-bottom: 40px;
+    page-break-inside: avoid;
+}
+
+.chart-section h2 {
+    font-size: 18px;
+    color: #1F2937;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #E5E7EB;
+    padding-bottom: 10px;
+}
+
+.chart-container {
+    background: white;
+    padding: 20px;
+    border: 1px solid #E5E7EB;
+    border-radius: 6px;
+}
+
+.ranking-section {
+    margin-bottom: 40px;
+}
+
+.ranking-section h2 {
+    font-size: 18px;
+    color: #1F2937;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #E5E7EB;
+    padding-bottom: 10px;
+}
+
+.ranking-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+
+.ranking-table thead {
+    background: #F3F4F6;
+    border-bottom: 2px solid #D1D5DB;
+}
+
+.ranking-table th {
+    padding: 12px 10px;
+    text-align: left;
+    font-size: 12px;
+    font-weight: 600;
+    color: #374151;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.ranking-table td {
+    padding: 12px 10px;
+    border-bottom: 1px solid #E5E7EB;
+    font-size: 13px;
+}
+
+.ranking-table tbody tr:nth-child(even) {
+    background: #F9FAFB;
+}
+
+.ranking-table tbody tr:hover {
+    background: #F3F4F6;
+}
+
+.sku-code {
+    font-family: 'Monaco', 'Courier New', monospace;
+    font-weight: 600;
+    color: #2563EB;
+}
+
+.product-name {
+    color: #374151;
+}
+
+.return-count {
+    text-align: center;
+    font-weight: 600;
+    color: #DC2626;
+}
+
+.percentage {
+    text-align: right;
+    color: #6B7280;
+}
+
+.primary-category {
+    font-size: 12px;
+    color: #374151;
+}
+
+.category-count {
+    color: #9CA3AF;
+    font-size: 11px;
+    margin-left: 4px;
+}
+
+.category-summary {
+    margin-bottom: 40px;
+    page-break-inside: avoid;
+}
+
+.category-summary h2 {
+    font-size: 18px;
+    color: #1F2937;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #E5E7EB;
+    padding-bottom: 10px;
+}
+
+.category-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+}
+
+.category-box {
+    border: 1px solid #E5E7EB;
+    border-radius: 6px;
+    padding: 15px;
+    text-align: center;
+    background: #F9FAFB;
+}
+
+.category-name {
+    font-size: 11px;
+    color: #6B7280;
+    line-height: 1.4;
+    margin-bottom: 10px;
+}
+
+.category-count {
+    font-size: 24px;
+    font-weight: 700;
+    color: #2563EB;
+}
+
+.report-footer {
+    text-align: center;
+    color: #9CA3AF;
+    font-size: 11px;
+    padding-top: 20px;
+    border-top: 1px solid #E5E7EB;
+    margin-top: 40px;
+}
+
+@media print {
+    body {
+        background: white;
+    }
+    .container {
+        padding: 0;
+    }
+}

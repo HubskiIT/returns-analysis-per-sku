@@ -1,0 +1,326 @@
+[
+  {
+    "source": "mock",
+    "external_return_id": "RMA-2026-00001",
+    "sku": "ABC-001",
+    "order_id": "PL-10001",
+    "reason_text": "Sukienka jest bardziej bordowa niż czerwona na zdjęciu.",
+    "condition_note": "Towar bez śladów użytkowania, metki na miejscu.",
+    "returned_at": "2026-09-01T08:14:00Z"
+  },
+  {
+    "source": "mock",
+    "external_return_id": "RMA-2026-00002",
+    "sku": "ABC-001",
+    "order_id": "PL-10002",
+    "reason_text": "Rozmiar M okazał się bardzo ciasny w biuście.",
+    "condition_note": "Brak śladów użycia, produkt złożony w opakowaniu.",
+    "returned_at": "2026-09-01T09:22:00Z"
+  },
+  {
+    "source": "mock",
+    "external_return_id": "RMA-2026-00003",
+    "sku": "ABC-002",
+    "order_id": "PL-10003",
+    "reason_text": "Po pierwszym praniu bluza straciła kształt i zrobiły się kulki.",
+    "condition_note": "Widoczne intensywne ślady prania, bez rozdarć.",
+    "returned_at": "2026-09-01T10:05:00Z"
+  },
+  {
+    "source": "mock",
+    "external_return_id": "RMA-2026-00004",
+    "sku": "ABC-002",
+    "order_id": "PL-10004",
+    "reason_text": "Kolor na żywo jest dużo jaśniejszy niż na stronie.",
+    "condition_note": "Klient twierdzi, że bluza była wadliwa, ale magazyn nie widzi wady.",
+    "returned_at": "2026-09-01T11:17:00Z"
+  },
+  {
+    "source": "mock",
+    "external_return_id": "RMA-2026-00005",
+    "sku": "ABC-003",
+    "order_id": "PL-10005",
+    "reason_text": "Jeansy są za szerokie w pasie, mimo że długość jest dobra.",
+    "condition_note": "Towar czysty i nieużywany.",
+    "returned_at": "2026-09-01T12:41:00Z"
+  },
+  {
+    "source": "mock",
+    "external_return_id": "RMA-2026-00006",
+    "sku": "ABC-003",
+    "order_id": "PL-10006",
+    "reason_text": "Na zdjęciach materiał wyglądał na grubszy.",
+    "condition_note": "Brak śladów użycia.",
+    "returned_at": "2026-09-02T08:03:00Z"
+  },
+  {
+    "source": "mock",
+    "external_return_id": "RMA-2026-00007",
+    "sku": "ABC-004",
+    "order_id": "PL-10007",
+    "reason_text": "Zmieniłem zdanie, koszula nie będzie mi potrzebna.",
+    "condition_note": "Produkt w idealnym stanie, tylko przymierzony.",
+    "returned_at": "2026-09-02T09:18:00Z"
+  },
+  {
+    "source": "mock",
+    "external_return_id": "RMA-2026-00008",
+    "sku": "ABC-004",
+    "order_id": "PL-10008",
+    "reason_text": "Len jest szorstki i nie przypomina tego z opisu.",
+    "condition_note": "Magazyn odnotował ślady dezodorantu na kołnierzu.",
+    "returned_at": "2026-09-02T10:27:00Z"
+  },
+  {
+    "source": "mock",
+    "external_return_id": "RMA-2026-00009",
+    "sku": "ABC-005",
+    "order_id": "PL-10009",
+    "reason_text": "Kurtka dotarła z rozpiętym szwem przy rękawie.",
+    "condition_note": "Rozdarcie wygląda na wadę fabryczną, opakowanie nienaruszone.",
+    "returned_at": "2026-09-02T11:46:00Z"
+  },
+  {
+    "source": "mock",
+    "external_return_id": "RMA-2026-00010",
+    "sku": "ABC-005",
+    "order_id": "PL-10010",
+    "reason_text": "Dostawa trwała tak długo, że wyjazd już się skończył.",
+    "condition_note": "Produkt nieużywany, zwrócony w oryginalnym kartonie.",
+    "returned_at": "2026-09-02T13:02:00Z"
+  },
+  {
+    "source": "mock",
+    "external_return_id": "RMA-2026-00011",
+    "sku": "ABC-006",
+    "order_id": "PL-10011",
+    "reason_text": "T-shirt ma inny odcień zieleni niż na zdjęciu.",
+    "condition_note": "Bez śladów noszenia.",
+    "returned_at": "2026-09-03T08:09:00Z"
+  },
+  {
+    "source": "mock",
+    "external_return_id": "RMA-2026-00012",
+    "sku": "ABC-006",
+    "order_id": "PL-10012",
+    "reason_text": "Po założeniu okazało się, że krój mi nie pasuje.",
+    "condition_note": "Towar zmechacony pod pachami, widoczne ślady użytkowania.",
+    "returned_at": "2026-09-03T09:31:00Z"
+  },
+  {
+    "source": "mock",
+    "external_return_id": "RMA-2026-00013",
+    "sku": "ABC-007",
+    "order_id": "PL-10013",
+    "reason_text": "Przyszedł rozmiar 32 zamiast zamówionego 34.",
+    "condition_note": "Na etykiecie magazynowej widnieje SKU ABC-007-32.",
+    "returned_at": "2026-09-03T10:12:00Z"
+  },
+  {
+    "source": "mock",
+    "external_return_id": "RMA-2026-00014",
+    "sku": "ABC-007",
+    "order_id": "PL-10014",
+    "reason_text": "Spodnie są za krótkie, a w tabeli miały mieć 108 cm.",
+    "condition_note": "Zmierzona długość to 108 cm, spodnie bez wad.",
+    "returned_at": "2026-09-03T11:08:00Z"
+  },
+  {
+    "source": "mock",
+    "external_return_id": "RMA-2026-00015",
+    "sku": "ABC-008",
+    "order_id": "PL-10015",
+    "reason_text": "Sweter gryzie i jest za ciepły jak na tę porę roku.",
+    "condition_note": "Produkt nieużywany, tylko przymierzony.",
+    "returned_at": "2026-09-04T08:56:00Z"
+  },
+  {
+    "source": "mock",
+    "external_return_id": "RMA-2026-00016",
+    "sku": "ABC-008",
+    "order_id": "PL-10016",
+    "reason_text": "Nie podoba mi się fason, proszę o zwrot pieniędzy.",
+    "condition_note": "Towar z wyraźnymi śladami noszenia i zapachem perfum.",
+    "returned_at": "2026-09-04T10:44:00Z"
+  },
+  {
+    "source": "mock",
+    "external_return_id": "RMA-2026-00017",
+    "sku": "ABC-009",
+    "order_id": "PL-10017",
+    "reason_text": "Lewy but ma odklejoną podeszwę przy czubku.",
+    "condition_note": "Wada widoczna, pudełko lekko wgniecione.",
+    "returned_at": "2026-09-04T11:20:00Z"
+  },
+  {
+    "source": "mock",
+    "external_return_id": "RMA-2026-00018",
+    "sku": "ABC-009",
+    "order_id": "PL-10018",
+    "reason_text": "Paczka przyszła po terminie, więc nie chcę już tych butów.",
+    "condition_note": "Pudełko rozerwane i zapiaszczone, buty mają otarcia od transportu.",
+    "returned_at": "2026-09-04T12:37:00Z"
+  },
+  {
+    "source": "mock",
+    "external_return_id": "RMA-2026-00019",
+    "sku": "ABC-010",
+    "order_id": "PL-10019",
+    "reason_text": "Botki są za ciasne w łydce, mimo prawidłowego rozmiaru stopy.",
+    "condition_note": "Brak śladów użycia, skóra bez uszkodzeń.",
+    "returned_at": "2026-09-05T08:11:00Z"
+  },
+  {
+    "source": "mock",
+    "external_return_id": "RMA-2026-00020",
+    "sku": "ABC-010",
+    "order_id": "PL-10020",
+    "reason_text": "Na zdjęciu botki były czarne, a otrzymałem granatowe.",
+    "condition_note": "W magazynie potwierdzono granatowy wariant zgodny z etykietą zamówienia.",
+    "returned_at": "2026-09-05T09:49:00Z"
+  },
+  {
+    "source": "mock",
+    "external_return_id": "RMA-2026-00021",
+    "sku": "ABC-011",
+    "order_id": "PL-10021",
+    "reason_text": "Pasek sandała pękł przy pierwszym założeniu.",
+    "condition_note": "Pęknięcie materiału przy klamrze, bez zabrudzeń.",
+    "returned_at": "2026-09-05T10:26:00Z"
+  },
+  {
+    "source": "mock",
+    "external_return_id": "RMA-2026-00022",
+    "sku": "ABC-011",
+    "order_id": "PL-10022",
+    "reason_text": "Nie pasuje mi kolor, na stronie wyglądał na beżowy.",
+    "condition_note": "Produkt nieużywany, kolor zgodny z kodem producenta.",
+    "returned_at": "2026-09-05T11:55:00Z"
+  },
+  {
+    "source": "mock",
+    "external_return_id": "RMA-2026-00023",
+    "sku": "ABC-012",
+    "order_id": "PL-10023",
+    "reason_text": "Torebka ma zamek po drugiej stronie niż wynikało ze zdjęć.",
+    "condition_note": "Brak wad, wszystkie elementy zgodne ze specyfikacją producenta.",
+    "returned_at": "2026-09-06T08:42:00Z"
+  },
+  {
+    "source": "mock",
+    "external_return_id": "RMA-2026-00024",
+    "sku": "ABC-012",
+    "order_id": "PL-10024",
+    "reason_text": "Po namyśle wolę większą torbę.",
+    "condition_note": "Produkt nowy i kompletny.",
+    "returned_at": "2026-09-06T09:16:00Z"
+  },
+  {
+    "source": "mock",
+    "external_return_id": "RMA-2026-00025",
+    "sku": "ABC-013",
+    "order_id": "PL-10025",
+    "reason_text": "Plecak przyszedł z urwanym paskiem.",
+    "condition_note": "Karton mocno wgnieciony, uszkodzenie na zewnętrznej stronie plecaka.",
+    "returned_at": "2026-09-06T10:03:00Z"
+  },
+  {
+    "source": "mock",
+    "external_return_id": "RMA-2026-00026",
+    "sku": "ABC-013",
+    "order_id": "PL-10026",
+    "reason_text": "Plecak jest za mały na laptopa 15 cali, chociaż opis mówił o dużej komorze.",
+    "condition_note": "Plecak czysty i bez uszkodzeń.",
+    "returned_at": "2026-09-06T11:29:00Z"
+  },
+  {
+    "source": "mock",
+    "external_return_id": "RMA-2026-00027",
+    "sku": "ABC-014",
+    "order_id": "PL-10027",
+    "reason_text": "Pasek jest za krótki, nie mogę zapiąć go na ostatnią dziurkę.",
+    "condition_note": "Długość produktu zgodna z tabelą, brak śladów użycia.",
+    "returned_at": "2026-09-07T08:35:00Z"
+  },
+  {
+    "source": "mock",
+    "external_return_id": "RMA-2026-00028",
+    "sku": "ABC-014",
+    "order_id": "PL-10028",
+    "reason_text": "Pasek miał być skórzany, ale wygląda jak tworzywo.",
+    "condition_note": "Na etykiecie producenta skóra naturalna, bez śladów użytkowania.",
+    "returned_at": "2026-09-07T09:08:00Z"
+  },
+  {
+    "source": "mock",
+    "external_return_id": "RMA-2026-00029",
+    "sku": "ABC-015",
+    "order_id": "PL-10029",
+    "reason_text": "Kubek przecieka przy zakrętce po zamknięciu.",
+    "condition_note": "Uszczelka zdeformowana, możliwa wada fabryczna.",
+    "returned_at": "2026-09-07T10:24:00Z"
+  },
+  {
+    "source": "mock",
+    "external_return_id": "RMA-2026-00030",
+    "sku": "ABC-015",
+    "order_id": "PL-10030",
+    "reason_text": "Nie potrzebuję już kubka, kupiłem inny w promocji.",
+    "condition_note": "Kubek używany, widoczne ślady kawy wewnątrz.",
+    "returned_at": "2026-09-07T11:46:00Z"
+  },
+  {
+    "source": "mock",
+    "external_return_id": "RMA-2026-00031",
+    "sku": "ABC-016",
+    "order_id": "PL-10031",
+    "reason_text": "Lampka dotarła pęknięta przy podstawie.",
+    "condition_note": "Pęknięcie i wgniecenie pudełka wskazują na uszkodzenie w transporcie.",
+    "returned_at": "2026-09-08T08:07:00Z"
+  },
+  {
+    "source": "mock",
+    "external_return_id": "RMA-2026-00032",
+    "sku": "ABC-016",
+    "order_id": "PL-10032",
+    "reason_text": "Światło jest zimne, a w opisie było neutralne.",
+    "condition_note": "Model i temperatura barwowa zgodne z etykietą, produkt nieużywany.",
+    "returned_at": "2026-09-08T09:28:00Z"
+  },
+  {
+    "source": "mock",
+    "external_return_id": "RMA-2026-00033",
+    "sku": "ABC-017",
+    "order_id": "PL-10033",
+    "reason_text": "Koc jest dużo cieńszy niż wyglądał na fotografii.",
+    "condition_note": "Brak wad, metka i opakowanie zachowane.",
+    "returned_at": "2026-09-08T10:51:00Z"
+  },
+  {
+    "source": "mock",
+    "external_return_id": "RMA-2026-00034",
+    "sku": "ABC-017",
+    "order_id": "PL-10034",
+    "reason_text": "Koc ma plamę na środku, zauważyłem ją dopiero po rozpakowaniu.",
+    "condition_note": "Magazyn potwierdził plamę, bez śladów używania.",
+    "returned_at": "2026-09-08T11:33:00Z"
+  },
+  {
+    "source": "mock",
+    "external_return_id": "RMA-2026-00035",
+    "sku": "ABC-018",
+    "order_id": "PL-10035",
+    "reason_text": "Organizer nie mieści się w szufladzie, wymiary na stronie były inne.",
+    "condition_note": "Wymiary zgodne z kartą produktu, brak uszkodzeń.",
+    "returned_at": "2026-09-09T08:19:00Z"
+  },
+  {
+    "source": "mock",
+    "external_return_id": "RMA-2026-00036",
+    "sku": "ABC-018",
+    "order_id": "PL-10036",
+    "reason_text": "Po prostu nie jest mi już potrzebny.",
+    "condition_note": "Produkt nieużywany, komplet akcesoriów dołączony.",
+    "returned_at": "2026-09-09T09:57:00Z"
+  }
+]

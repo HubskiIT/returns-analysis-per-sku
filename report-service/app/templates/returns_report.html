@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analiza przyczyn zwrotów</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header class="report-header">
+            <h1>Analiza przyczyn zwrotów per SKU</h1>
+            <p class="period">Okres: {{ reporting_period }}</p>
+            <p class="generated">Wygenerowano: {{ run_date.strftime('%Y-%m-%d %H:%M') }}</p>
+        </header>
+
+        <section class="summary-section">
+            <div class="summary-grid">
+                <div class="summary-card">
+                    <div class="summary-label">Całkowite zwroty</div>
+                    <div class="summary-value">{{ total_returns }}</div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-label">Do weryfikacji ręcznej</div>
+                    <div class="summary-value">{{ total_flagged_for_review }}</div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-label">Produkty analizowane</div>
+                    <div class="summary-value">{{ top_skus|length }}</div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-label">Kategorie przyczyn</div>
+                    <div class="summary-value">8</div>
+                </div>
+            </div>
+        </section>
+
+        <section class="chart-section">
+            <h2>Rozkład przyczyn zwrotów</h2>
+            <div class="chart-container">
+                {{ chart_svg|safe }}
+            </div>
+        </section>
+
+        <section class="ranking-section">
+            <h2>Ranking produktów z największą liczbą zwrotów</h2>
+            <table class="ranking-table">
+                <thead>
+                    <tr>
+                        <th>SKU</th>
+                        <th>Nazwa produktu</th>
+                        <th>Liczba zwrotów</th>
+                        <th>% ogółu</th>
+                        <th>Główna przyczyna</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for sku in top_skus %}
+                    <tr>
+                        <td class="sku-code">{{ sku.sku }}</td>
+                        <td class="product-name">{{ sku.product_name }}</td>
+                        <td class="return-count">{{ sku.return_count }}</td>
+                        <td class="percentage">{{ "%.1f"|format(sku.percent_of_total) }}%</td>
+                        <td class="primary-category">
+                            {% set top_category = sku.category_breakdown|dictsort(by='value', reverse=True)|first %}
+                            {% if top_category %}
+                                {{ top_category[0] }}
+                                <span class="category-count">({{ top_category[1] }})</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </section>
+
+        <section class="category-summary">
+            <h2>Podsumowanie przyczyn</h2>
+            <div class="category-grid">
+                {% set summary = request.summary_by_category() %}
+                {% for category in categories %}
+                <div class="category-box">
+                    <div class="category-name">{{ category }}</div>
+                    <div class="category-count">{{ summary.get(category, 0) }}</div>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+
+        <footer class="report-footer">
+            <p>Raport automatycznie generowany w systemie analizy zwrotów.</p>
+        </footer>
+    </div>
+</body>
+</html>

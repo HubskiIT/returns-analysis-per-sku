@@ -1,0 +1,128 @@
+[
+  {
+    "sku": "ABC-001",
+    "name": "Sukienka midi Luna",
+    "category": "odzież damska",
+    "unit_price": "189.90",
+    "supplier": "ModaNova"
+  },
+  {
+    "sku": "ABC-002",
+    "name": "Bluza bawełniana Basic",
+    "category": "odzież damska",
+    "unit_price": "119.00",
+    "supplier": "CottonWorks"
+  },
+  {
+    "sku": "ABC-003",
+    "name": "Jeansy slim Urban",
+    "category": "odzież damska",
+    "unit_price": "169.50",
+    "supplier": "DenimLab"
+  },
+  {
+    "sku": "ABC-004",
+    "name": "Koszula lniana Porto",
+    "category": "odzież damska",
+    "unit_price": "149.90",
+    "supplier": "LinoHouse"
+  },
+  {
+    "sku": "ABC-005",
+    "name": "Kurtka przejściowa North",
+    "category": "odzież damska",
+    "unit_price": "279.00",
+    "supplier": "NorthSupply"
+  },
+  {
+    "sku": "ABC-006",
+    "name": "T-shirt organiczny Wave",
+    "category": "odzież męska",
+    "unit_price": "69.90",
+    "supplier": "CottonWorks"
+  },
+  {
+    "sku": "ABC-007",
+    "name": "Chinosy męskie City",
+    "category": "odzież męska",
+    "unit_price": "159.90",
+    "supplier": "DenimLab"
+  },
+  {
+    "sku": "ABC-008",
+    "name": "Sweter wełniany Oslo",
+    "category": "odzież męska",
+    "unit_price": "219.00",
+    "supplier": "NordicTextile"
+  },
+  {
+    "sku": "ABC-009",
+    "name": "Sneakersy Street One",
+    "category": "obuwie",
+    "unit_price": "249.90",
+    "supplier": "StepFactory"
+  },
+  {
+    "sku": "ABC-010",
+    "name": "Botki skórzane Classic",
+    "category": "obuwie",
+    "unit_price": "329.00",
+    "supplier": "StepFactory"
+  },
+  {
+    "sku": "ABC-011",
+    "name": "Sandały letnie Sol",
+    "category": "obuwie",
+    "unit_price": "139.90",
+    "supplier": "FootLine"
+  },
+  {
+    "sku": "ABC-012",
+    "name": "Torebka crossbody Nova",
+    "category": "akcesoria",
+    "unit_price": "179.00",
+    "supplier": "LeatherPoint"
+  },
+  {
+    "sku": "ABC-013",
+    "name": "Plecak miejski Metro",
+    "category": "akcesoria",
+    "unit_price": "159.50",
+    "supplier": "BagCraft"
+  },
+  {
+    "sku": "ABC-014",
+    "name": "Pasek skórzany Classic",
+    "category": "akcesoria",
+    "unit_price": "79.90",
+    "supplier": "LeatherPoint"
+  },
+  {
+    "sku": "ABC-015",
+    "name": "Kubek termiczny Steel",
+    "category": "dom i lifestyle",
+    "unit_price": "89.00",
+    "supplier": "HomeGear"
+  },
+  {
+    "sku": "ABC-016",
+    "name": "Lampka biurkowa Focus",
+    "category": "dom i lifestyle",
+    "unit_price": "129.90",
+    "supplier": "BrightHome"
+  },
+  {
+    "sku": "ABC-017",
+    "name": "Koc bawełniany Soft",
+    "category": "dom i lifestyle",
+    "unit_price": "109.00",
+    "supplier": "HomeGear"
+  },
+  {
+    "sku": "ABC-018",
+    "name": "Organizer na biurko Grid",
+    "category": "dom i lifestyle",
+    "unit_price": "59.90",
+    "supplier": "DeskForm"
+  }
+]

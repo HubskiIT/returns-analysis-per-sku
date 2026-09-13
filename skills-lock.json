@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "skills": {
+    "find-skills": {
+      "source": "vercel-labs/skills",
+      "sourceType": "github",
+      "skillPath": "skills/find-skills/SKILL.md",
+      "computedHash": "b146008599c31057cef1c145774cea5d5afb30e8f43fa802e47a4b461419aaaf"
+    },
+    "n8n-credentials-and-security-official": {
+      "source": "n8n-io/skills",
+      "sourceType": "github",
+      "skillPath": "skills/n8n-credentials-and-security-official/SKILL.md",
+      "computedHash": "09264a6f423a73cdc2682596f694d9a78d19b9e6a318d3f9adcca791cad51577"
+    },
+    "n8n-debugging-official": {
+      "source": "n8n-io/skills",
+      "sourceType": "github",
+      "skillPath": "skills/n8n-debugging-official/SKILL.md",
+      "computedHash": "d2bd13bf5aa8634cd464625771634b0488863bc524b7938e5251fb051ac61359"
+    },
+    "n8n-error-handling-official": {
+      "source": "n8n-io/skills",
+      "sourceType": "github",
+      "skillPath": "skills/n8n-error-handling-official/SKILL.md",
+      "computedHash": "d0060f0f3cf3ffd4cb21dd372e70cc70cd86406bff54786178dfad830ae04908"
+    },
+    "n8n-node-configuration-official": {
+      "source": "n8n-io/skills",
+      "sourceType": "github",
+      "skillPath": "skills/n8n-node-configuration-official/SKILL.md",
+      "computedHash": "772a4e21015c3edbd71df233485c8d4b02c7082c555657e8ebc062113bbd204a"
+    },
+    "using-n8n-skills-official": {
+      "source": "n8n-io/skills",
+      "sourceType": "github",
+      "skillPath": "skills/using-n8n-skills-official/SKILL.md",
+      "computedHash": "73cf279da4de724648de5f2cfb1b49aa0ae824c69b4ed6af11ee896bf71d19d4"
+    }
+  }
+}

@@ -1,0 +1,571 @@
+[
+    {
+        "updatedAt": "2026-09-13T10:08:16.816Z",
+        "createdAt": "2026-09-13T09:12:52.987Z",
+        "id": "BkuEj75ftP0Kzywf",
+        "name": "Weekly Returns Analysis",
+        "description": null,
+        "active": false,
+        "isArchived": false,
+        "nodes": [
+            {
+                "id": "47ee0161-c2a4-4321-b7c7-fccfa31dae2e",
+                "name": "Schedule Trigger",
+                "type": "n8n-nodes-base.scheduleTrigger",
+                "typeVersion": 1,
+                "position": [
+                    0,
+                    0
+                ],
+                "parameters": {
+                    "rule": {
+                        "interval": [
+                            {}
+                        ]
+                    }
+                }
+            },
+            {
+                "id": "4e7f0ca4-9ce6-4367-91b5-20b6789848b2",
+                "name": "Upsert SKU Cache",
+                "type": "n8n-nodes-base.postgres",
+                "typeVersion": 2,
+                "position": [
+                    400,
+                    0
+                ],
+                "parameters": {
+                    "operation": "executeQuery",
+                    "query": "INSERT INTO sku_catalog_cache (sku, name, category, unit_price, supplier, updated_at) VALUES ($1, $2, $3, $4, $5, NOW()) ON CONFLICT (sku) DO UPDATE SET name = $2, category = $3, unit_price = $4, supplier = $5, updated_at = NOW()",
+                    "options": {
+                        "queryReplacement": "={{ $json.sku }},={{ $json.name }},={{ $json.category }},={{ $json.unit_price }},={{ $json.supplier }}"
+                    }
+                },
+                "credentials": {
+                    "postgres": {
+                        "id": "xji6JEDoMime10GH",
+                        "name": "postgres_default"
+                    }
+                }
+            },
+            {
+                "id": "0d0fd5ba-0ab3-4fa0-ac68-64dd6e2e05fd",
+                "name": "Check Confidence Threshold",
+                "type": "n8n-nodes-base.if",
+                "typeVersion": 1,
+                "position": [
+                    848,
+                    0
+                ],
+                "parameters": {
+                    "conditions": {
+                        "number": [
+                            {
+                                "value1": "={{ $json.confidence }}",
+                                "value2": 0.6,
+                                "comparator": "lt"
+                            }
+                        ]
+                    }
+                }
+            },
+            {
+                "id": "93688950-b80a-4777-a5de-6b9d6472eb3b",
+                "name": "Save Returns to Database",
+                "type": "n8n-nodes-base.postgres",
+                "typeVersion": 2,
+                "position": [
+                    1008,
+                    0
+                ],
+                "parameters": {
+                    "operation": "executeQuery",
+                    "query": "INSERT INTO returns (external_return_id, sku, reason_category, confidence, needs_review, reason_text, condition_note, returned_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) ON CONFLICT (external_return_id) DO NOTHING",
+                    "options": {
+                        "queryReplacement": "={{ $json.external_return_id }},={{ $json.sku }},={{ $json.reason_category }},={{ $json.confidence }},={{ $json.needs_review }},={{ $json.reason_text }},={{ $json.condition_note }},={{ $json.returned_at }}"
+                    }
+                },
+                "credentials": {
+                    "postgres": {
+                        "id": "xji6JEDoMime10GH",
+                        "name": "postgres_default"
+                    }
+                }
+            },
+            {
+                "id": "0df51534-2d3e-4c46-acb3-2457f8f8df58",
+                "name": "Get Top SKUs",
+                "type": "n8n-nodes-base.postgres",
+                "typeVersion": 2,
+                "position": [
+                    1200,
+                    0
+                ],
+                "parameters": {
+                    "operation": "executeQuery",
+                    "query": "WITH sku_totals AS (SELECT sku, COUNT(*) as return_count FROM returns GROUP BY sku), category_json AS (SELECT sku, json_object_agg(reason_category, cat_count) as category_breakdown FROM (SELECT sku, reason_category, COUNT(*) as cat_count FROM returns GROUP BY sku, reason_category) sub GROUP BY sku), top10 AS (SELECT st.sku, c.name as product_name, st.return_count, ROUND(st.return_count * 100.0 / GREATEST((SELECT COUNT(*) FROM returns), 1), 1) as percent_of_total, cj.category_breakdown FROM sku_totals st JOIN sku_catalog_cache c ON st.sku = c.sku JOIN category_json cj ON st.sku = cj.sku ORDER BY st.return_count DESC LIMIT 10) SELECT json_build_object('reporting_period', to_char(now() - interval '7 days', 'YYYY-MM-DD') || ' to ' || to_char(now(), 'YYYY-MM-DD'), 'total_returns', (SELECT COUNT(*) FROM returns), 'total_flagged_for_review', (SELECT COUNT(*) FROM returns WHERE needs_review = true), 'top_skus', COALESCE((SELECT json_agg(top10) FROM top10), '[]'::json)) as report_body"
+                },
+                "credentials": {
+                    "postgres": {
+                        "id": "xji6JEDoMime10GH",
+                        "name": "postgres_default"
+                    }
+                }
+            },
+            {
+                "id": "85ee6917-1283-484b-bf95-fd38945c6a89",
+                "name": "Render Report PDF",
+                "type": "n8n-nodes-base.httpRequest",
+                "typeVersion": 3,
+                "position": [
+                    1408,
+                    0
+                ],
+                "parameters": {
+                    "method": "POST",
+                    "url": "http://report-service:8000/render",
+                    "options": {},
+                    "jsonBody": "={{ JSON.stringify($json.report_body) }}",
+                    "sendBody": true,
+                    "contentType": "json",
+                    "specifyBody": "json"
+                }
+            },
+            {
+                "id": "324c90cf-0a30-40d0-baae-e3369e4fb385",
+                "name": "Send Email Report",
+                "disabled": true,
+                "type": "n8n-nodes-base.sendGrid",
+                "typeVersion": 1,
+                "position": [
+                    1600,
+                    0
+                ],
+                "parameters": {
+                    "resource": "mail",
+                    "operation": "send",
+                    "fromEmail": "noreply@returns-analysis.local",
+                    "fromName": "Returns Analysis",
+                    "toEmail": "team@example.com",
+                    "subject": "Weekly Returns Analysis Report",
+                    "dynamicTemplate": false,
+                    "contentType": "text/html",
+                    "contentValue": "={{ $node['Render Report PDF'].json.html }}"
+                },
+                "credentials": {
+                    "sendGridApi": {
+                        "id": null,
+                        "name": "sendgrid_default"
+                    }
+                }
+            },
+            {
+                "id": "50f9ac87-e973-4d59-9501-51c9ad0a8c31",
+                "name": "Log Classification Run",
+                "type": "n8n-nodes-base.postgres",
+                "typeVersion": 2,
+                "position": [
+                    1808,
+                    0
+                ],
+                "parameters": {
+                    "operation": "executeQuery",
+                    "query": "INSERT INTO classification_runs (returns_processed, flagged_for_review) VALUES ($1, $2)",
+                    "options": {
+                        "queryReplacement": "={{ $('Get Top SKUs').item.json.report_body.total_returns }},={{ $('Get Top SKUs').item.json.report_body.total_flagged_for_review }}"
+                    }
+                },
+                "credentials": {
+                    "postgres": {
+                        "id": "xji6JEDoMime10GH",
+                        "name": "postgres_default"
+                    }
+                }
+            },
+            {
+                "id": "e86cc1bf-228e-445f-8668-8c8697108b19",
+                "name": "Read Mock Returns",
+                "type": "n8n-nodes-base.readWriteFile",
+                "typeVersion": 1.1,
+                "position": [
+                    208,
+                    0
+                ],
+                "parameters": {
+                    "operation": "read",
+                    "fileSelector": "/home/node/data/mock/returns_sample.json"
+                }
+            },
+            {
+                "id": "bc17f70f-deed-4657-8882-101bf6a0a9f3",
+                "name": "Parse Mock JSON",
+                "type": "n8n-nodes-base.extractFromFile",
+                "typeVersion": 1.1,
+                "position": [
+                    300,
+                    0
+                ],
+                "parameters": {
+                    "operation": "fromJson",
+                    "binaryPropertyName": "data",
+                    "destinationKey": "data"
+                }
+            },
+            {
+                "id": "d4da7418-420c-425d-84f9-24076dd2ef14",
+                "name": "Split Out Returns",
+                "type": "n8n-nodes-base.splitOut",
+                "typeVersion": 1,
+                "position": [
+                    350,
+                    0
+                ],
+                "parameters": {
+                    "fieldToSplitOut": "data",
+                    "include": "noOtherFields"
+                }
+            },
+            {
+                "id": "2153625c-33ed-4b11-8964-9d022363f961",
+                "name": "Read Mock Catalog",
+                "type": "n8n-nodes-base.readWriteFile",
+                "typeVersion": 1.1,
+                "position": [
+                    100,
+                    -150
+                ],
+                "parameters": {
+                    "operation": "read",
+                    "fileSelector": "/home/node/data/mock/catalog_sample.json"
+                }
+            },
+            {
+                "id": "69fcc3d9-2e66-4bc2-b925-14bbd2815a6e",
+                "name": "Parse Catalog JSON",
+                "type": "n8n-nodes-base.extractFromFile",
+                "typeVersion": 1.1,
+                "position": [
+                    150,
+                    -150
+                ],
+                "parameters": {
+                    "operation": "fromJson",
+                    "binaryPropertyName": "data",
+                    "destinationKey": "data"
+                }
+            },
+            {
+                "id": "f8633867-e730-43a7-a7fa-df78130c6afa",
+                "name": "Split Out Catalog",
+                "type": "n8n-nodes-base.splitOut",
+                "typeVersion": 1,
+                "position": [
+                    200,
+                    -150
+                ],
+                "parameters": {
+                    "fieldToSplitOut": "data",
+                    "include": "noOtherFields"
+                }
+            },
+            {
+                "id": "97e7edd7-7bc5-4ba7-8610-f4d45e1ce8b6",
+                "name": "Limit To One",
+                "type": "n8n-nodes-base.limit",
+                "typeVersion": 1,
+                "position": [
+                    750,
+                    0
+                ],
+                "parameters": {
+                    "maxItems": 1
+                }
+            },
+            {
+                "id": "511aa8d6-c2bd-4e94-b269-f22ec1c7ad37",
+                "name": "Classify Return Reason",
+                "type": "n8n-nodes-base.httpRequest",
+                "typeVersion": 4.5,
+                "position": [
+                    608,
+                    0
+                ],
+                "parameters": {
+                    "method": "POST",
+                    "url": "https://api.anthropic.com/v1/messages",
+                    "authentication": "genericCredentialType",
+                    "genericAuthType": "httpHeaderAuth",
+                    "sendHeaders": true,
+                    "headerParameters": {
+                        "parameters": [
+                            {
+                                "name": "anthropic-version",
+                                "value": "2023-06-01"
+                            },
+                            {
+                                "name": "content-type",
+                                "value": "application/json"
+                            }
+                        ]
+                    },
+                    "sendBody": true,
+                    "contentType": "json",
+                    "specifyBody": "json",
+                    "jsonBody": "={{ JSON.stringify({model: \"claude-haiku-4-5\", max_tokens: 128, messages: [{role: \"user\", content: \"Jeste\\u015b klasyfikatorem przyczyn zwrot\\u00f3w w sklepie internetowym. Na podstawie tekstu klienta i notatki magazynu wybierz dok\\u0142adnie jedn\\u0105 kategori\\u0119 z zamkni\\u0119tej listy.\\n\\nKategorie:\\n1. Niezgodno\\u015b\\u0107 z opisem lub zdj\\u0119ciem - produkt, kolor, materia\\u0142, rozmiar lub w\\u0142a\\u015bciwo\\u015b\\u0107 r\\u00f3\\u017cni si\\u0119 od informacji na stronie, ale nie chodzi o preferencj\\u0119 dopasowania.\\n2. Wada jako\\u015bciowa, uszkodzenie fabryczne - wada produktu powsta\\u0142a przed u\\u017cyciem lub przy produkcji.\\n3. Uszkodzenie w transporcie - uszkodzenie powsta\\u0142o podczas dostawy; uwzgl\\u0119dnij wgniecione albo rozerwane opakowanie.\\n4. B\\u0142\\u0119dna wysy\\u0142ka, nie ten produkt - wys\\u0142ano inny SKU, wariant, kolor albo rozmiar ni\\u017c zam\\u00f3wiony.\\n5. Niedopasowanie, rozmiar, kolor, dopasowanie - produkt nie pasuje klientowi rozmiarem, fasonem, kolorem preferowanym przez klienta albo wygod\\u0105, bez twierdzenia, \\u017ce opis by\\u0142 fa\\u0142szywy.\\n6. Zmiana decyzji klienta - klient po prostu zmieni\\u0142 zdanie albo produkt nie jest ju\\u017c potrzebny.\\n7. Op\\u00f3\\u017aniona dostawa, zam\\u00f3wienie nieaktualne - zwrot wynika z op\\u00f3\\u017anienia dostawy lub utraty aktualno\\u015bci zam\\u00f3wienia.\\n8. Inne, nieokre\\u015blone - brak wystarczaj\\u0105cych informacji albo przyczyna nie pasuje do pozosta\\u0142ych kategorii.\\n\\nZasady rozstrzygania:\\n- Najpierw rozdziel b\\u0142\\u0105d sklepu lub przewo\\u017anika od zwyk\\u0142ego braku dopasowania.\\n- Je\\u015bli klient i magazyn opisuj\\u0105 r\\u00f3\\u017cne przyczyny, wybierz kategori\\u0119 najlepiej wspart\\u0105 przez oba \\u017ar\\u00f3d\\u0142a i obni\\u017c confidence.\\n- Notatka magazynu jest dowodem stanu fizycznego, ale nie uniewa\\u017cnia wiarygodnego opisu klienta dotycz\\u0105cego koloru, materia\\u0142u albo dostawy.\\n- Nie tw\\u00f3rz nowych kategorii i nie t\\u0142umacz decyzji poza wymaganym JSON-em.\\n- confidence to liczba od 0 do 1. U\\u017cyj ni\\u017cszej warto\\u015bci, gdy teksty s\\u0105 kr\\u00f3tkie, sprzeczne albo niejednoznaczne.\\n\\nTekst klienta:\\n<reason_text>\\n\" + $json.reason_text + \"\\n</reason_text>\\n\\nNotatka magazynu:\\n<condition_note>\\n\" + $json.condition_note + \"\\n</condition_note>\\n\\nZwr\\u00f3\\u0107 wy\\u0142\\u0105cznie jeden poprawny obiekt JSON, bez markdownu i bez dodatkowych p\\u00f3l:\\n{\\\"category\\\":\\\"jedna z o\\u015bmiu kategorii powy\\u017cej\\\",\\\"confidence\\\":0.00}\"}]}) }}",
+                    "options": {
+                        "batching": {
+                            "batch": {
+                                "batchSize": 3,
+                                "batchInterval": 1000
+                            }
+                        }
+                    }
+                },
+                "credentials": {
+                    "httpHeaderAuth": {
+                        "id": "Jm0KhBvOSd6TriBs",
+                        "name": "anthropic_header_auth"
+                    }
+                }
+            },
+            {
+                "id": "7bcb3d10-a61e-40fa-af9f-631e04319d67",
+                "name": "Parse Classification",
+                "type": "n8n-nodes-base.code",
+                "typeVersion": 2,
+                "position": [
+                    750,
+                    0
+                ],
+                "parameters": {
+                    "language": "javaScript",
+                    "jsCode": "const CATEGORIES = [\n  'Niezgodno\u015b\u0107 z opisem lub zdj\u0119ciem',\n  'Wada jako\u015bciowa, uszkodzenie fabryczne',\n  'Uszkodzenie w transporcie',\n  'B\u0142\u0119dna wysy\u0142ka, nie ten produkt',\n  'Niedopasowanie, rozmiar, kolor, dopasowanie',\n  'Zmiana decyzji klienta',\n  'Op\u00f3\u017aniona dostawa, zam\u00f3wienie nieaktualne',\n  'Inne, nieokre\u015blone'\n];\n\nfunction normalizeCategory(raw) {\n  if (!raw) return { category: 'Inne, nieokre\u015blone', matched: false };\n  const cleaned = raw.replace(/^\\d+\\.\\s*/, '').trim();\n  for (const cat of CATEGORIES) {\n    if (cleaned === cat || cleaned.startsWith(cat)) {\n      return { category: cat, matched: true };\n    }\n  }\n  return { category: 'Inne, nieokre\u015blone', matched: false };\n}\n\nconst originals = $('Split Out Returns').all();\nconst responses = $input.all();\nconst results = [];\nfor (let i = 0; i < responses.length; i++) {\n  const raw = responses[i].json.content?.[0]?.text || '';\n  const cleaned = raw.trim().replace(/^```(?:json)?\\s*|\\s*```$/gi, '');\n  const start = cleaned.indexOf('{');\n  const end = cleaned.lastIndexOf('}');\n  const parsed = JSON.parse(cleaned.slice(start, end + 1));\n  const { category, matched } = normalizeCategory(parsed.category);\n  let confidence = typeof parsed.confidence === 'number' ? parsed.confidence : 0.5;\n  if (!matched) confidence = Math.min(confidence, 0.4);\n  results.push({\n    json: {\n      ...originals[i].json,\n      reason_category: category,\n      confidence,\n      needs_review: confidence < 0.6\n    }\n  });\n}\nreturn results;"
+                }
+            }
+        ],
+        "connections": {
+            "Check Confidence Threshold": {
+                "main": [
+                    [
+                        {
+                            "node": "Save Returns to Database",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ],
+                    [
+                        {
+                            "node": "Save Returns to Database",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "Save Returns to Database": {
+                "main": [
+                    [
+                        {
+                            "node": "Get Top SKUs",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "Get Top SKUs": {
+                "main": [
+                    [
+                        {
+                            "node": "Render Report PDF",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "Render Report PDF": {
+                "main": [
+                    [
+                        {
+                            "node": "Send Email Report",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "Send Email Report": {
+                "main": [
+                    [
+                        {
+                            "node": "Log Classification Run",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "Read Mock Returns": {
+                "main": [
+                    [
+                        {
+                            "node": "Parse Mock JSON",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "Parse Mock JSON": {
+                "main": [
+                    [
+                        {
+                            "node": "Split Out Returns",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "Schedule Trigger": {
+                "main": [
+                    [
+                        {
+                            "node": "Read Mock Catalog",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "Read Mock Catalog": {
+                "main": [
+                    [
+                        {
+                            "node": "Parse Catalog JSON",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "Parse Catalog JSON": {
+                "main": [
+                    [
+                        {
+                            "node": "Split Out Catalog",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "Split Out Catalog": {
+                "main": [
+                    [
+                        {
+                            "node": "Upsert SKU Cache",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "Upsert SKU Cache": {
+                "main": [
+                    [
+                        {
+                            "node": "Limit To One",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "Limit To One": {
+                "main": [
+                    [
+                        {
+                            "node": "Read Mock Returns",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "Split Out Returns": {
+                "main": [
+                    [
+                        {
+                            "node": "Classify Return Reason",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "Classify Return Reason": {
+                "main": [
+                    [
+                        {
+                            "node": "Parse Classification",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "Parse Classification": {
+                "main": [
+                    [
+                        {
+                            "node": "Check Confidence Threshold",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            }
+        },
+        "settings": {
+            "executionOrder": "v1",
+            "binaryMode": "separate",
+            "availableInMCP": true
+        },
+        "staticData": null,
+        "meta": null,
+        "nodeGroups": [],
+        "pinData": {},
+        "versionId": "d8c382a5-155d-4f9a-93d0-61c5d92c4fc5",
+        "activeVersionId": null,
+        "versionCounter": 19,
+        "triggerCount": 0,
+        "sourceWorkflowId": null,
+        "tags": [],
+        "shared": [
+            {
+                "updatedAt": "2026-09-13T09:29:50.397Z",
+                "createdAt": "2026-09-13T09:29:50.397Z",
+                "role": "workflow:owner",
+                "workflowId": "BkuEj75ftP0Kzywf",
+                "projectId": "Dn6gkSr1QnuKbRMw",
+                "project": {
+                    "updatedAt": "2026-09-13T09:30:49.496Z",
+                    "createdAt": "2026-09-13T09:26:55.387Z",
+                    "id": "Dn6gkSr1QnuKbRMw",
+                    "name": "Hubert  Grzybowski <grzybowski.it@gmial.com>",
+                    "type": "personal",
+                    "icon": null,
+                    "description": null,
+                    "customTelemetryTags": [],
+                    "creatorId": "5912b461-d46e-4e30-9227-f0d8a3184722"
+                }
+            }
+        ],
+        "versionMetadata": {
+            "name": null,
+            "description": null
+        }
+    }
+]

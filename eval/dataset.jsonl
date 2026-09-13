@@ -1,0 +1,30 @@
+{"id":"eval-001","reason_text":"Kolor swetra na stronie był kremowy, a otrzymałem wyraźnie żółty.","condition_note":"Sweter nowy, bez śladów użycia.","expected_category":"Niezgodność z opisem lub zdjęciem"}
+{"id":"eval-002","reason_text":"W plecaku pękł szew przy pierwszym użyciu.","condition_note":"Pęknięcie szwu, opakowanie bez uszkodzeń.","expected_category":"Wada jakościowa, uszkodzenie fabryczne"}
+{"id":"eval-003","reason_text":"Pudełko było wgniecione, a lampa ma pękniętą podstawę.","condition_note":"Wgniecenie kartonu dokładnie w miejscu uszkodzenia lampy.","expected_category":"Uszkodzenie w transporcie"}
+{"id":"eval-004","reason_text":"Zamówiłem czarne buty 42, dostałem białe 41.","condition_note":"Etykieta paczki wskazuje wariant biały, rozmiar 41.","expected_category":"Błędna wysyłka, nie ten produkt"}
+{"id":"eval-005","reason_text":"Kurtka jest za szeroka w ramionach i źle na mnie leży.","condition_note":"Kurtka czysta, tylko przymierzona.","expected_category":"Niedopasowanie, rozmiar, kolor, dopasowanie"}
+{"id":"eval-006","reason_text":"Kupiłem ten kubek na prezent, ale ostatecznie nie będzie potrzebny.","condition_note":"Kubek nieużywany, komplet zachowany.","expected_category":"Zmiana decyzji klienta"}
+{"id":"eval-007","reason_text":"Przesyłka dotarła tydzień po wydarzeniu, na które zamawiałem koszulę.","condition_note":"Koszula nieużywana i bez wad.","expected_category":"Opóźniona dostawa, zamówienie nieaktualne"}
+{"id":"eval-008","reason_text":"Nie wiem, co dokładnie jest nie tak, po prostu chcę zwrócić.","condition_note":"Brak dodatkowych informacji.","expected_category":"Inne, nieokreślone"}
+{"id":"eval-009","reason_text":"Materiał miał być lniany, ale w dotyku i na metce jest poliester.","condition_note":"Metka wskazuje 100% poliester.","expected_category":"Niezgodność z opisem lub zdjęciem"}
+{"id":"eval-010","reason_text":"Po rozpakowaniu zauważyłem odpruty guzik i luźną nitkę.","condition_note":"Wada widoczna, brak śladów noszenia.","expected_category":"Wada jakościowa, uszkodzenie fabryczne"}
+{"id":"eval-011","reason_text":"Karton rozerwany, a organizer ma połamane rogi.","condition_note":"Ślady uderzenia na opakowaniu i produkcie.","expected_category":"Uszkodzenie w transporcie"}
+{"id":"eval-012","reason_text":"W paczce znalazła się torebka zamiast zamówionego plecaka.","condition_note":"Kod na produkcie nie zgadza się z zamówieniem.","expected_category":"Błędna wysyłka, nie ten produkt"}
+{"id":"eval-013","reason_text":"Sandały uciskają mnie w palce, choć długość stopy się zgadza.","condition_note":"Brak śladów użycia.","expected_category":"Niedopasowanie, rozmiar, kolor, dopasowanie"}
+{"id":"eval-014","reason_text":"Znalazłem podobny produkt taniej i rezygnuję z tego zamówienia.","condition_note":"Towar nieużywany.","expected_category":"Zmiana decyzji klienta"}
+{"id":"eval-015","reason_text":"Paczka miała być w poniedziałek, dotarła w piątek po moim wyjeździe.","condition_note":"Produkt bez uszkodzeń.","expected_category":"Opóźniona dostawa, zamówienie nieaktualne"}
+{"id":"eval-016","reason_text":"Nie pasuje mi ten produkt.","condition_note":"Produkt nowy.","expected_category":"Niedopasowanie, rozmiar, kolor, dopasowanie"}
+{"id":"eval-017","reason_text":"Na zdjęciu kieszenie były po bokach, w otrzymanej kurtce są tylko z przodu.","condition_note":"Kurtka zgodna z kodem SKU, bez wad.","expected_category":"Niezgodność z opisem lub zdjęciem"}
+{"id":"eval-018","reason_text":"Podeszwa odpadła po jednym spacerze.","condition_note":"Buty mają ślady jednego użycia, odklejenie przy nosku.","expected_category":"Wada jakościowa, uszkodzenie fabryczne"}
+{"id":"eval-019","reason_text":"Przesyłka została zgnieciona przez kuriera.","condition_note":"Produkt w środku również zgnieciony.","expected_category":"Uszkodzenie w transporcie"}
+{"id":"eval-020","reason_text":"Miał być rozmiar M czerwony, przyszedł S niebieski.","condition_note":"Na etykiecie S/niebieski.","expected_category":"Błędna wysyłka, nie ten produkt"}
+{"id":"eval-021","reason_text":"Kolor mi się znudził i wolę teraz inny.","condition_note":"Produkt nieużywany.","expected_category":"Niedopasowanie, rozmiar, kolor, dopasowanie"}
+{"id":"eval-022","reason_text":"Zamówienie było impulsem, proszę je anulować po dostawie.","condition_note":"Opakowanie otwarte, brak śladów użytkowania.","expected_category":"Zmiana decyzji klienta"}
+{"id":"eval-023","reason_text":"Dostawa trwała 12 dni zamiast zapowiadanych dwóch.","condition_note":"Towar bez wad, zwrócony w komplecie.","expected_category":"Opóźniona dostawa, zamówienie nieaktualne"}
+{"id":"eval-024","reason_text":"Produkt jest jakiś dziwny, nie potrafię wskazać dlaczego.","condition_note":"Brak widocznej wady i brak szczegółów od klienta.","expected_category":"Inne, nieokreślone"}
+{"id":"eval-025","reason_text":"Opis mówił o kieszeni na laptopa, ale jej nie ma.","condition_note":"Plecak bez uszkodzeń, model zgodny z kodem.","expected_category":"Niezgodność z opisem lub zdjęciem"}
+{"id":"eval-026","reason_text":"Na froncie lampki od razu przestał działać przycisk.","condition_note":"Przycisk nie reaguje, brak uszkodzeń mechanicznych.","expected_category":"Wada jakościowa, uszkodzenie fabryczne"}
+{"id":"eval-027","reason_text":"W kartonie było dużo luzu, a kubek przyszedł rozbity.","condition_note":"Odłamany uchwyt i pęknięcie kartonu.","expected_category":"Uszkodzenie w transporcie"}
+{"id":"eval-028","reason_text":"Dostałem dwa lewe buty zamiast pary.","condition_note":"Oba buty mają ten sam kierunek, błąd kompletacji.","expected_category":"Błędna wysyłka, nie ten produkt"}
+{"id":"eval-029","reason_text":"Sweter jest za długi i rękawy nachodzą na dłonie.","condition_note":"Sweter nieużywany, wymiary zgodne z tabelą.","expected_category":"Niedopasowanie, rozmiar, kolor, dopasowanie"}
+{"id":"eval-030","reason_text":"Nie mam już ochoty na ten zakup, proszę o zwrot.","condition_note":"Towar kompletny, bez śladów użycia.","expected_category":"Zmiana decyzji klienta"}
